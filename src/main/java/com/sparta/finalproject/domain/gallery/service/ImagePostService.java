@@ -14,6 +14,7 @@ import com.sparta.finalproject.global.response.exceptionType.ClassroomException;
 import com.sparta.finalproject.global.response.exceptionType.ImagePostException;
 import com.sparta.finalproject.infra.s3.S3Service;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -28,6 +29,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Service
+@Slf4j
 @RequiredArgsConstructor
 public class ImagePostService {
 
@@ -44,12 +46,10 @@ public class ImagePostService {
         );
         ImagePost imagePost = imagePostRepository.save(ImagePost.of(imagePostRequestDto, classroom));
         List<MultipartFile> imageList = imagePostRequestDto.getImageList();
-        if (imageList != null) {
-            s3Service.upload(imageList, "gallery", imagePost);
-        }
-        Image image = imageRepository.findFirstByImagePost(imagePost);
         List<String> imageUrlList = new ArrayList<>();
-        imageUrlList.add(image.getImageUrl());
+        if (imageList != null) {
+            imageUrlList = s3Service.uploadAsList(imageList, "gallery", imagePost);
+        }
         return GlobalResponseDto.of(CustomStatusCode.ADD_IMAGE_POST_SUCCESS, ImagePostResponseDto.of(imagePost, imageUrlList));
     }
 
@@ -90,7 +90,7 @@ public class ImagePostService {
         for (ImagePost imagePost : imagePostList) {
             Image image = imageRepository.findFirstByImagePost(imagePost);
             List<String> imageUrlList = new ArrayList<>();
-            imageUrlList.add(s3Service.getThumbnailPath(image.getImageUrl()));
+            imageUrlList.add(image.getImageUrl());
             responseDtoList.add(ImagePostResponseDto.of(imagePost, imageUrlList));
         }
         return GlobalResponseDto.of(CustomStatusCode.FIND_IMAGE_POST_PAGE_SUCCESS, responseDtoList);
