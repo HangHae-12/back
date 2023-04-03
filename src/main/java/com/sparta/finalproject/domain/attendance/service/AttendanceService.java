@@ -53,13 +53,13 @@ public class AttendanceService {
         // 등원 처리
         if(attendance.getEnterTime()==null) {
             attendance.enter(LocalTime.now());
-            return GlobalResponseDto.of(CustomStatusCode.CHILD_ENTER_SUCCESS, null);
+            return GlobalResponseDto.of(CustomStatusCode.CHILD_ENTER_SUCCESS);
         }
 
         // 등원 처리 취소
         else {
             attendance.enter(null);
-            return GlobalResponseDto.of(CustomStatusCode.CHILD_ENTER_CANCEL, null);
+            return GlobalResponseDto.of(CustomStatusCode.CHILD_ENTER_CANCEL);
         }
     }
 
@@ -72,13 +72,13 @@ public class AttendanceService {
         // 하원 처리
         if(attendance.getExitTime()==null) {
             attendance.exit(LocalTime.now());
-            return GlobalResponseDto.of(CustomStatusCode.CHILD_EXIT_SUCCESS, null);
+            return GlobalResponseDto.of(CustomStatusCode.CHILD_EXIT_SUCCESS);
         }
 
         // 하원 처리 취소
         else {
             attendance.exit(null);
-            return GlobalResponseDto.of(CustomStatusCode.CHILD_EXIT_CANCEL, null);
+            return GlobalResponseDto.of(CustomStatusCode.CHILD_EXIT_CANCEL);
         }
     }
 
