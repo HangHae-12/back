@@ -33,11 +33,11 @@ public class AttendanceService {
     @Transactional
     @Scheduled(cron = "0 0 0 * * 1-5")
     public void addDailyAttendance(){
-        List<Child> childList = childRepository.findAll();
+        List<Child> children = childRepository.findAll();
         List<Attendance> attendanceList = new ArrayList<>();
-        if(childList.isEmpty())
+        if(children.isEmpty())
             throw new ChildException(CHILD_NOT_FOUND);
-        for(Child child : childList){
+        for(Child child : children){
             if(attendanceRepository.findByChildAndDate(child, LocalDate.now()).isEmpty())
                 attendanceList.add(Attendance.from(child));
         }
