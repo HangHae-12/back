@@ -1,13 +1,12 @@
 package com.sparta.finalproject.domain.attendance.service;
 
-import com.sparta.finalproject.domain.attendance.dto.AbsentAddRequestDto;
-import com.sparta.finalproject.domain.attendance.dto.AbsentAddResponseDto;
 import com.sparta.finalproject.domain.attendance.entity.Attendance;
 import com.sparta.finalproject.domain.attendance.repository.AttendanceRepository;
 import com.sparta.finalproject.domain.child.entity.Child;
 import com.sparta.finalproject.domain.child.repository.ChildRepository;
 import com.sparta.finalproject.global.dto.GlobalResponseDto;
 import com.sparta.finalproject.global.response.CustomStatusCode;
+import com.sparta.finalproject.global.response.exceptionType.AttendanceException;
 import com.sparta.finalproject.global.response.exceptionType.ChildException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -16,11 +15,12 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
-import java.time.Period;
+import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
 
 import static com.sparta.finalproject.global.response.CustomStatusCode.CHILD_NOT_FOUND;
+import static com.sparta.finalproject.global.response.CustomStatusCode.NOT_FOUND_ATTENDANCE;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -44,21 +44,43 @@ public class AttendanceService {
         attendanceRepository.saveAll(attendanceList);
     }
 
-    // 결석 신청
+    // 등원 처리
     @Transactional
-    public GlobalResponseDto addAbsent(Long childId, AbsentAddRequestDto requestDto) {
-        Child child = childRepository.findById(childId).orElseThrow(
-                () -> new ChildException(CustomStatusCode.CHILD_NOT_FOUND)
+    public GlobalResponseDto modifyEnterStatus(Long childId){
+        Attendance attendance = attendanceRepository.findByChildIdAndDate(childId, LocalDate.now()).orElseThrow(
+                () -> new AttendanceException(NOT_FOUND_ATTENDANCE)
         );
-        LocalDate startDate = requestDto.getStartDate();
-        LocalDate endDate = requestDto.getEndDate();
-        List<Attendance> attendanceList = new ArrayList<>();
-        Period period = Period.between(startDate, endDate);
-        for(int i = 0; i < period.getDays()+1; i++){
-            Attendance attendance = Attendance.of(child, startDate.plusDays(i), requestDto.getReason());
-            attendanceList.add(attendance);
+        // 등원 처리
+        if(attendance.getEnterTime()==null) {
+            attendance.enter(LocalTime.now());
+            return GlobalResponseDto.of(CustomStatusCode.CHILD_ENTER_SUCCESS, null);
         }
-        attendanceRepository.saveAll(attendanceList);
-        return GlobalResponseDto.of(CustomStatusCode.CREATE_ABSENT_SUCCESS, AbsentAddResponseDto.of(startDate, endDate, requestDto.getReason()));
+
+        // 등원 처리 취소
+        else {
+            attendance.enter(null);
+            return GlobalResponseDto.of(CustomStatusCode.CHILD_ENTER_CANCEL, null);
+        }
     }
+
+    // 하원 처리
+    @Transactional
+    public GlobalResponseDto modifyExitStatus(Long childId){
+        Attendance attendance = attendanceRepository.findByChildIdAndDate(childId, LocalDate.now()).orElseThrow(
+                () -> new AttendanceException(NOT_FOUND_ATTENDANCE)
+        );
+        // 하원 처리
+        if(attendance.getExitTime()==null) {
+            attendance.exit(LocalTime.now());
+            return GlobalResponseDto.of(CustomStatusCode.CHILD_EXIT_SUCCESS, null);
+        }
+
+        // 하원 처리 취소
+        else {
+            attendance.exit(null);
+            return GlobalResponseDto.of(CustomStatusCode.CHILD_EXIT_CANCEL, null);
+        }
+    }
+
+
 }
