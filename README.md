@@ -11,7 +11,7 @@
 * **기간** : 2023년 3월 10일 ~ 2023년 4월 21일
 
 * **프론트엔드 깃허브** : [킨더그루 FrontEnd](https://github.com/HangHae-12/Front)
-* **팀 노션** : [팀 노션 바로가기](https://www.notion.so/f4e7bbe6c3cb40689064a4c566b91144https://www.notion.so/f4e7bbe6c3cb40689064a4c566b91144)
+* **팀 노션** : [팀 노션 바로가기](https://desert-drain-4d3.notion.site/f4e7bbe6c3cb40689064a4c566b91144?pvs=4)
 
 * **팀원**
  
